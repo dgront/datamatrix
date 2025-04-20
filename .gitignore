@@ -2,10 +2,8 @@ debug/
 target/
 .idea/
 pkg/
-target/
 venv-maturin/
 .venv/
-.idea/
 Cargo.lock
 *.pdb
 *.dat

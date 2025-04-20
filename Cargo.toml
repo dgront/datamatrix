@@ -2,12 +2,12 @@
 name = "datamatrix"
 version = "0.1.0"
 edition = "2021"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["dgront@chem.uw.edu.pl"]
 description = "Flexible matrix for 2D data with annotated rows and columns"
-license = "MIT OR Apache-2.0"
-repository = "https://github.com/yourusername/datamatrix"
+license = "Apache-2.0"
+repository = "https://github.com/dgront/datamatrix"
 keywords = ["matrix", "data", "loader", "scientific", "heatmap"]
-categories = ["science", "data-processing"]
+categories = ["science", "data-structures"]
 
 [dependencies]
 clap = { version = "4.4", features = ["derive"] }
