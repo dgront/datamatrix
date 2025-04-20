@@ -1,0 +1,3 @@
+# Comment lines are allowed
+alice bob 1.2
+bob john 2.4
