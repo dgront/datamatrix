@@ -1,3 +1,60 @@
+//! # datamatrix
+//!
+//! `datamatrix` provides a simple and efficient implementation of a two-dimensional matrix
+//! of numeric values (`f64`), with support for labeled rows and columns.
+//!
+//! It is particularly useful for handling datasets where elements are naturally accessed
+//! by meaningful names rather than numeric indices. In addition to direct matrix construction,
+//! the crate offers utilities to read matrices from structured text files.
+//!
+//! ## Features
+//!
+//! - Storage of 2D numeric data with row and column labels.
+//! - Indexing by position or by label.
+//! - Construction of matrices from raw data.
+//! - Reading matrices from the following text file formats:
+//!   - Three-column format (row label, column label, value).
+//!   - Single column of values (for square matrices).
+//!   - Indexed format with explicit (row, column) indices and labels.
+//! - Optional symmetric filling (automatically populating (i, j) and (j, i)).
+//!
+//! ## Core Structures
+//!
+//! - [`DataMatrix`]: Represents a dense 2D matrix with labeled rows and columns.
+//!
+//! ## Reading Matrices
+//!
+//! - [`read_matrix()`]: Reads a matrix from a file with three columns (row label, column label, value).
+//! - [`read_column()`]: Reads a flat list of values forming a square matrix.
+//! - [`read_matrix_indexed()`]: Reads a matrix from a file providing explicit indices along with labels.
+//!
+//! ## Error Handling
+//!
+//! All I/O operations and parsing procedures return a custom [`Error`] type, which provides
+//! detailed feedback about issues encountered during file reading or parsing.
+//!
+//! ## Example
+//!
+//! ```no_run
+//! use datamatrix::{read_matrix, DataMatrix, Error};
+//!
+//! # fn main() -> Result<(), Error> {
+//! let matrix = read_matrix(
+//!     "./path/to/file.txt",
+//!     0, 1, 2, // columns: row label, column label, value
+//!     true    // make symmetric
+//! )?;
+//!
+//! let value = matrix.get_by_label("Alice", "Bob");
+//! println!("{:?}", value);
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! ## License
+//!
+//! This project is licensed under the Apache 2.0 license.
+
 mod errors;
 pub use crate::errors::Error;
 
@@ -6,6 +63,7 @@ use std::fs::File;
 use std::io;
 use std::io::BufRead;
 use std::path::Path;
+use crate::Error::IncorrectMatrixLabels;
 
 /// A dense matrix of numeric values with labeled rows and columns.
 #[derive(Debug, Clone)]
@@ -23,15 +81,16 @@ pub struct DataMatrix {
 impl DataMatrix {
     /// Creates a new DataMatrix from data and labels.
     ///
-    /// Panics if the data shape does not match the labels.
-    pub fn new(data: Vec<Vec<f64>>, row_labels: Vec<String>, col_labels: Vec<String>) -> Self {
-        assert_eq!(data.len(), row_labels.len(), "Row label count does not match number of rows");
-        assert!(
-            data.is_empty() || data[0].len() == col_labels.len(),
-            "Column label count does not match number of columns"
-        );
+    /// Results in an error if the data shape does not match the labels.
+    pub fn new(data: Vec<Vec<f64>>, row_labels: Vec<String>, col_labels: Vec<String>) -> Result<Self, Error> {
+        if data.len() != row_labels.len() {
+            return  Err(IncorrectMatrixLabels{ expected: row_labels.len(), actual: data.len()})
+        }
+        if data.is_empty() || data[0].len() != col_labels.len() {
+            return  Err(IncorrectMatrixLabels{ expected: col_labels.len(), actual: data[0].len()})
+        }
 
-        Self { data, row_labels, col_labels }
+        Ok(Self { data, row_labels, col_labels })
     }
 
     /// Returns the number of rows.
@@ -181,7 +240,7 @@ pub fn read_matrix<P: AsRef<Path>>(filename: P, col_i: usize, col_j: usize, col_
         labels[index] = label.clone();
     }
 
-    Ok(DataMatrix::new(data, labels.clone(), labels))
+    DataMatrix::new(data, labels.clone(), labels)
 }
 
 /// Reads a flat list of values forming a square matrix (row-wise order),
@@ -192,12 +251,12 @@ pub fn read_matrix<P: AsRef<Path>>(filename: P, col_i: usize, col_j: usize, col_
 /// # Example file
 /// ```text
 /// # Single-column square matrix
-/// 1.0
-/// 2.0
-/// 3.0
-/// 4.0
+/// 1.1
+/// 2.2
+/// 3.3
+/// 4.4
 /// ```
-/// -> forms 2x2 matrix: [[1.0, 2.0], [3.0, 4.0]]
+/// -> forms 2x2 matrix: [[1.1, 2.2], [3.3, 4.4]]
 ///
 /// # Example
 ///
@@ -206,9 +265,9 @@ pub fn read_matrix<P: AsRef<Path>>(filename: P, col_i: usize, col_j: usize, col_
 /// # fn main() -> Result<(), Error> {
 /// # let file_path = "./tests/test_files/single_columns_short.txt";
 /// let matrix = read_column(file_path)?;
-/// assert_eq!(matrix.nrows(), 3);
-/// assert_eq!(matrix.get_by_label("alice", "bob"), Some(1.2));
-/// assert_eq!(matrix.get_by_label("bob", "alice"), Some(1.2)); // symmetric
+/// assert_eq!(matrix.nrows(), 2);
+/// assert_eq!(matrix.get_by_label("row0", "col1"), Some(2.2));
+/// assert_eq!(matrix.get_by_label("row1", "col1"), Some(4.4));
 /// # Ok(())
 /// # }
 /// ```
@@ -264,7 +323,7 @@ pub fn read_column<P: AsRef<Path>>(filename: P) -> Result<DataMatrix, Error> {
     let row_labels: Vec<String> = (0..n).map(|i| format!("row{}", i)).collect();
     let col_labels: Vec<String> = (0..n).map(|i| format!("col{}", i)).collect();
 
-    Ok(DataMatrix::new(data, row_labels, col_labels))
+    DataMatrix::new(data, row_labels, col_labels)
 }
 
 macro_rules! parse_token {
@@ -357,7 +416,7 @@ pub fn read_matrix_indexed<P: AsRef<Path>>(filename: P, row_labels: usize, col_l
         col_labels_vec[j] = col_label;
     }
 
-    Ok(DataMatrix::new(data, row_labels_vec, col_labels_vec))
+    DataMatrix::new(data, row_labels_vec, col_labels_vec)
 }
 
 

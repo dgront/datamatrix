@@ -1,0 +1,17 @@
+[package]
+name = "py_datamatrix"
+version = "0.2.0"
+edition = "2021"
+
+[lib]
+name = "datamatrix"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.24", features = ["extension-module"] }
+datamatrix = { path = "../../" }
+
+
+[package.metadata.maturin]
+name = "datamatrix"
+
