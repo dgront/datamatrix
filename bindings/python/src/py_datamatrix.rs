@@ -33,24 +33,3 @@ impl PyDataMatrix {
     }
 }
 
-#[pyfunction]
-pub fn read_matrix(filename: &str, col_i: usize, col_j: usize, col_val: usize, make_symmetric: bool) -> PyResult<PyDataMatrix> {
-    let dm = datamatrix::read_matrix(filename, col_i, col_j, col_val, make_symmetric)
-        .map_err(|msg| PyErr::new::<pyo3::exceptions::PyValueError, _>(msg.to_string()));
-    Ok(PyDataMatrix::from_datamatrix(dm?))
-}
-
-#[pyfunction]
-pub fn read_matrix_indexed(filename: &str, row_labels: usize, col_labels: usize,
-                           row_idx: usize, col_idx: usize, col_val: usize, make_symmetric: bool) -> PyResult<PyDataMatrix> {
-    let dm = datamatrix::read_matrix_indexed(filename, row_labels, col_labels, row_idx, col_idx, col_val, make_symmetric)
-        .map_err(|msg| PyErr::new::<pyo3::exceptions::PyValueError, _>(msg.to_string()));
-    Ok(PyDataMatrix::from_datamatrix(dm?))
-}
-
-#[pyfunction]
-pub fn read_column(filename: &str) -> PyResult<PyDataMatrix> {
-    let dm = datamatrix::read_column(filename)
-        .map_err(|msg| PyErr::new::<pyo3::exceptions::PyValueError, _>(msg.to_string()));
-    Ok(PyDataMatrix::from_datamatrix(dm?))
-}

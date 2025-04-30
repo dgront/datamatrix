@@ -1,0 +1,106 @@
+city name1,city name2,distance,i,j
+Tokyo,Seoul,1149.36,0,1
+Tokyo,Beijing,2089.39,0,2
+Tokyo,Bangkok,4598.95,0,3
+Tokyo,Singapore,5311.22,0,4
+Tokyo,Paris,9711.72,0,5
+Tokyo,Madrid,10761.73,0,6
+Tokyo,Rome,9852.38,0,7
+Tokyo,Berlin,8915.53,0,8
+Tokyo,Warsaw,8577.74,0,9
+Tokyo,Los Angeles,8819.39,0,10
+Tokyo,Miami,12003.89,0,11
+Tokyo,Chicago,10141.41,0,12
+Tokyo,New York City,10851.73,0,13
+Tokyo,Toronto,10351.69,0,14
+Seoul,Beijing,952.33,1,2
+Seoul,Bangkok,3722.1,1,3
+Seoul,Singapore,4671.94,1,4
+Seoul,Paris,8965.73,1,5
+Seoul,Madrid,9995.44,1,6
+Seoul,Rome,8966.28,1,7
+Seoul,Berlin,8126.78,1,8
+Seoul,Warsaw,7740.37,1,9
+Seoul,Los Angeles,9585.8,1,10
+Seoul,Miami,12422.96,1,11
+Seoul,Chicago,10509.84,1,12
+Seoul,New York City,11052.58,1,13
+Seoul,Toronto,10601.16,1,14
+Beijing,Bangkok,3296.04,2,3
+Beijing,Singapore,4471.89,2,4
+Beijing,Paris,8216.99,2,5
+Beijing,Madrid,9222.48,2,6
+Beijing,Rome,8125.19,2,7
+Beijing,Berlin,7357.55,2,8
+Beijing,Warsaw,6941.31,2,9
+Beijing,Los Angeles,10061.74,2,10
+Beijing,Miami,12513.44,2,11
+Beijing,Chicago,10603.49,2,12
+Beijing,New York City,10989.09,2,13
+Beijing,Toronto,10590.0,2,14
+Bangkok,Singapore,1426.76,3,4
+Bangkok,Paris,9443.1,3,5
+Bangkok,Madrid,10181.53,3,6
+Bangkok,Rome,8828.72,3,7
+Bangkok,Berlin,8603.25,3,8
+Bangkok,Warsaw,8089.76,3,9
+Bangkok,Los Angeles,13303.07,3,10
+Bangkok,Miami,15620.24,3,11
+Bangkok,Chicago,13772.87,3,12
+Bangkok,New York City,13931.98,3,13
+Bangkok,Toronto,13631.66,3,14
+Singapore,Paris,10729.02,4,5
+Singapore,Madrid,11380.77,4,6
+Singapore,Rome,10016.63,4,7
+Singapore,Berlin,9916.3,4,8
+Singapore,Warsaw,9399.36,4,9
+Singapore,Los Angeles,14120.98,4,10
+Singapore,Miami,16969.48,4,11
+Singapore,Chicago,15071.86,4,12
+Singapore,New York City,15332.5,4,13
+Singapore,Toronto,15000.78,4,14
+Paris,Madrid,1052.89,5,6
+Paris,Rome,1105.28,5,7
+Paris,Berlin,877.46,5,8
+Paris,Warsaw,1366.55,5,9
+Paris,Los Angeles,9085.51,5,10
+Paris,Miami,7356.57,5,11
+Paris,Chicago,6650.63,5,12
+Paris,New York City,5837.24,5,13
+Paris,Toronto,6000.94,5,14
+Madrid,Rome,1364.17,6,7
+Madrid,Berlin,1869.15,6,8
+Madrid,Warsaw,2289.85,6,9
+Madrid,Los Angeles,9362.65,6,10
+Madrid,Miami,7090.75,6,11
+Madrid,Chicago,6724.66,6,12
+Madrid,New York City,5768.0,6,13
+Madrid,Toronto,6036.01,6,14
+Rome,Berlin,1182.55,7,8
+Rome,Warsaw,1314.97,7,9
+Rome,Los Angeles,10188.99,7,10
+Rome,Miami,8339.5,7,11
+Rome,Chicago,7740.32,7,12
+Rome,New York City,6889.94,7,13
+Rome,Toronto,7081.23,7,14
+Berlin,Warsaw,517.17,8,9
+Berlin,Los Angeles,9309.68,8,10
+Berlin,Miami,7995.91,8,11
+Berlin,Chicago,7083.44,8,12
+Berlin,New York City,6385.0,8,13
+Berlin,Toronto,6476.09,8,14
+Warsaw,Los Angeles,9636.88,9,10
+Warsaw,Miami,8487.17,9,11
+Warsaw,Chicago,7511.05,9,12
+Warsaw,New York City,6854.2,9,13
+Warsaw,Toronto,6921.53,9,14
+Los Angeles,Miami,3758.77,10,11
+Los Angeles,Chicago,2803.97,10,12
+Los Angeles,New York City,3935.75,10,13
+Los Angeles,Toronto,3494.31,10,14
+Miami,Chicago,1917.31,11,12
+Miami,New York City,1757.96,11,13
+Miami,Toronto,1990.55,11,14
+Chicago,New York City,1144.29,12,13
+Chicago,Toronto,701.07,12,14
+New York City,Toronto,550.36,13,14

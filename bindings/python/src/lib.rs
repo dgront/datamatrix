@@ -3,15 +3,15 @@ use pyo3::prelude::*;
 mod py_datamatrix;
 pub use py_datamatrix::*;
 
+mod py_datamatrix_builder;
+pub use py_datamatrix_builder::*;
+
 /// Python module definition
 #[pymodule]
 fn datamatrix(m: &Bound<'_, PyModule>) -> PyResult<()> {
 
     m.add_class::<PyDataMatrix>()?;
-
-    m.add_function(wrap_pyfunction!(read_matrix, m)?)?;
-    m.add_function(wrap_pyfunction!(read_column, m)?)?;
-    m.add_function(wrap_pyfunction!(read_matrix_indexed, m)?)?;
+    m.add_class::<PyDataMatrixBuilder>()?;
 
     Ok(())
 }
