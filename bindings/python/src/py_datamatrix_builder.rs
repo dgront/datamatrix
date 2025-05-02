@@ -1,6 +1,7 @@
 use pyo3::prelude::*;
+use pyo3::exceptions::PyValueError;
 
-use datamatrix::{DataMatrix, DataMatrixBuilder};
+use datamatrix::DataMatrixBuilder;
 use crate::PyDataMatrix;
 
 #[pyclass(name = "DataMatrixBuilder")]
@@ -46,10 +47,21 @@ impl PyDataMatrixBuilder {
         PyDataMatrixBuilder { inner: new }
     }
 
+    pub fn labels(&self, labels: Vec<String>) -> Self {
+        let new = self.inner.clone().labels(labels);
+        PyDataMatrixBuilder { inner: new }
+    }
+
+    pub fn from_data(&self, data: Vec<f64>) -> PyResult<PyDataMatrix> {
+        let dm = self.inner.clone().from_data(&data)
+            .map_err(|msg| PyErr::new::<PyValueError, _>(msg.to_string()));
+        Ok(PyDataMatrix::from_datamatrix(dm?))
+    }
+
     pub fn from_file(&self, filename: &str) -> PyResult<PyDataMatrix> {
 
         let dm = self.inner.clone().from_file(filename)
-            .map_err(|msg| PyErr::new::<pyo3::exceptions::PyValueError, _>(msg.to_string()));
+            .map_err(|msg| PyErr::new::<PyValueError, _>(msg.to_string()));
         Ok(PyDataMatrix::from_datamatrix(dm?))
     }
 }

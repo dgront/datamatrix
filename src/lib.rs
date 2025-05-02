@@ -29,6 +29,7 @@
 //! - a flat list of values in a single column, forming a square matrix.
 //! - a matrix from a file providing explicit indices along with labels;
 //!   five columns are used in that case: row label, column label, row index, column index, value
+//! - `.csv` and `.tsv` file formats are supported as well.
 //!
 //! ## Error Handling
 //!
@@ -59,6 +60,10 @@
 //!
 //! let value = matrix.get_by_label("Alice", "Bob");
 //! println!("{:?}", value);
+//! # assert_eq!(value, Some(1.2));
+//! let value_again = matrix.get(0, 1);
+//! println!("{:?}", value);
+//! # assert_eq!(value, Some(1.2));
 //! # Ok(())
 //! # }
 //! ```
@@ -66,21 +71,38 @@
 //! By default, DataMatrixBuilder expects labels to be in the first two columns and the data in the third.
 //! The code above can be therefore shortened to:
 //! ```rust
+//! # use datamatrix::{DataMatrixBuilder, DataMatrix, Error};
+//! # fn main() -> Result<(), Error> {
+//! # let path = "./tests/test_files/three_columns_short.txt";
+//! let matrix = DataMatrixBuilder::new().symmetric(true).from_file(path)?;
+//! # let value = matrix.get_by_label("Alice", "Bob");
+//! # assert_eq!(value, Some(1.2));
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! `DataMatrix` allows also to look up the label of a given row or column and vice versa:
+//! ```rust
 //! use datamatrix::{DataMatrixBuilder, DataMatrix, Error};
 //!
 //! # fn main() -> Result<(), Error> {
 //! # let path = "./tests/test_files/three_columns_short.txt";
 //! let matrix = DataMatrixBuilder::new().symmetric(true).from_file(path)?;
-//! # let value = matrix.get_by_label("Alice", "Bob");
+//! let row_label = matrix.row_label(1);
+//! assert_eq!(row_label, "Bob");
+//! let row_index = matrix.row_index(row_label);
+//! assert_eq!(row_index, Some(1));
 //! # Ok(())
 //! # }
 //! ```
+//!
 //! ## License
 //!
 //! This project is licensed under the Apache 2.0 license.
 
 mod errors;
 mod datamatrix_builder;
+
 pub use datamatrix_builder::DataMatrixBuilder;
 pub use crate::errors::Error;
 use crate::Error::IncorrectMatrixLabels;
@@ -140,12 +162,28 @@ impl DataMatrix {
         self.get(row_idx, col_idx)
     }
 
+    /// Returns the label of a row by its index.
+    pub fn row_index(&self, label: &str) -> Option<usize> { self.row_labels.iter().position(|r| r == label) }
+
+    /// Returns the label of a column by its index.
+    pub fn col_index(&self, label: &str) -> Option<usize> { self.col_labels.iter().position(|r| r == label) }
+
+    /// Returns the label of a row by its index.
+    pub fn row_label(&self, index: usize) -> &String { &self.row_labels[index] }
+
+    /// Returns the label of a column by its index.
+    pub fn col_label(&self, index: usize) -> &String { &self.col_labels[index] }
+
     /// Returns the row labels.
+    ///
+    /// If the matrix is symmetric, the row labels are the same as the column labels.
     pub fn row_labels(&self) -> &[String] {
         &self.row_labels
     }
 
     /// Returns the column labels.
+    ///
+    /// If the matrix is symmetric, the row labels are the same as the column labels.
     pub fn col_labels(&self) -> &[String] {
         &self.col_labels
     }

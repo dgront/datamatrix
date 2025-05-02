@@ -42,4 +42,29 @@ mod test_builder {
         assert!(err.abs() < 0.0001);
         assert_eq!(dm.nrows(), 15);
     }
+
+    #[test]
+    fn from_single_column_labels() {
+        let input = "./tests/test_files/single_column_short.txt";
+        let labels = ["A", "B"].iter().map(|s|s.to_string()).collect();
+        let dm = DataMatrixBuilder::new()
+            .labels(labels)
+            .data_column(1)
+            .from_file(input).expect(&format!("Cant read the input file: {}", input));
+        assert_eq!(dm.nrows(), 2);
+        assert_eq!(dm.ncols(), 2);
+        assert_eq!(dm.get_by_label("A", "B"), Some(2.2));
+        assert_eq!(dm.get_by_label("B", "A"), Some(3.3)); // not symmetric!
+    }
+    #[test]
+    fn from_data() -> Result<(), datamatrix::Error> {
+        let data: [f64;9] = [0.0, 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0];
+        let dm = DataMatrixBuilder::new().from_data(&data)?;
+        assert_eq!(dm.nrows(), 3);
+        assert_eq!(dm.ncols(), 3);
+        assert_eq!(dm.get_by_label("row-1", "col-2"), Some(1.0));
+        assert_eq!(dm.get_by_label("row-2", "col-1"), Some(3.0)); // not symmetric!
+
+        Ok(())
+    }
 }

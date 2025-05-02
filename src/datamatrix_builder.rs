@@ -17,7 +17,8 @@ use crate::{DataMatrix, Error};
 /// # Supported formats
 /// - **Three-column format**: row label, column label, value
 /// - **Five-column format**: row label, column label, row index, column index, value
-/// - **Single-column format**: raw values for a square matrix (handled separately)
+/// - **Single-column format**: raw values for a square matrix (handled separately); requires labels provided by a user
+///   with `DataMatrixBuilder::labels()`.
 ///
 /// Lines starting with `#` are ignored as comments.
 ///
@@ -87,6 +88,7 @@ pub struct DataMatrixBuilder {
     separator: char,
     symmetric: bool,
     skip_header: bool,
+    labels: Option<Vec<String>>,
 }
 
 impl DataMatrixBuilder {
@@ -100,6 +102,7 @@ impl DataMatrixBuilder {
             separator: ' ',
             symmetric: false,
             skip_header: false,
+            labels: None,
         }
     }
 
@@ -120,6 +123,12 @@ impl DataMatrixBuilder {
     pub fn label_columns(mut self, row: usize, col: usize) -> Self {
         self.row_label_col = row - 1;
         self.col_label_col = col - 1;
+        self
+    }
+
+    /// Provides labels for the case when the input data is a single column.
+    pub fn labels(mut self, labels: Vec<String>) -> Self {
+        self.labels = Some(labels);
         self
     }
 
@@ -174,8 +183,50 @@ impl DataMatrixBuilder {
         self
     }
 
+    /// Creates a new `DataMatrix` from a given vector of data.
+    ///
+    /// ```rust
+    /// use datamatrix::{DataMatrixBuilder, Error};
+    /// # fn main() -> Result<(), Error> {
+    /// let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+    /// let matrix = DataMatrixBuilder::new().from_data(&data).unwrap();
+    /// assert_eq!(matrix.ncols(), 3);
+    /// assert_eq!(matrix.get(0,0).unwrap(), 1.0);
+    /// # Ok(())
+    /// # }
+    /// ```
+    pub fn from_data(self, data: &[f64]) -> Result<DataMatrix, Error> {
+        let len = data.len();
+        let n = (len as f64).sqrt() as usize;
+        if n * n != len {
+            return Err(Error::WrongNumberOfData { n_data: len });
+        }
+
+        let (row_labels, col_labels) = match &self.labels {
+            Some(given) => (given.clone(), given.clone()),
+            None => {
+                let rows = (0..n).map(|i| format!("row-{}", i + 1)).collect();
+                let cols = (0..n).map(|i| format!("col-{}", i + 1)).collect();
+                (rows, cols)
+            }
+        };
+
+        let mut matrix = Vec::with_capacity(n);
+        for i in 0..n {
+            let start = i * n;
+            let end = start + n;
+            matrix.push(data[start..end].to_vec());
+        }
+
+        DataMatrix::new(matrix, row_labels, col_labels)
+    }
+
     /// Loads the matrix from the given file path according to the current builder settings.
     pub fn from_file<P: AsRef<Path>>(self, filename: P)-> Result<DataMatrix, Error> {
+
+        if let Some(ref labels) = self.labels {
+            return self.read_one_column(filename, self.data_col, labels.clone());
+        }
 
         let mut row_indexer = Indexer::new();
         let mut col_indexer = Indexer::new();
@@ -223,6 +274,51 @@ impl DataMatrixBuilder {
         }
 
         DataMatrix::new(data, row_labels, col_labels)
+    }
+
+    fn read_one_column<P: AsRef<Path>>(&self, filename: P, column: usize, labels: Vec<String>) -> Result<DataMatrix, Error> {
+
+        let rows = parse_plain(filename, self.separator, self.skip_header)?;
+        let col_idx = column;
+
+        let mut values = Vec::new();
+
+        for (line_num, parts) in rows.into_iter().enumerate() {
+            if col_idx >= parts.len() {
+                return Err(Error::NotEnoughColumns {
+                    line: line_num + 1,
+                    needed: col_idx + 1,
+                    content: format!("{:?}", parts),
+                });
+            }
+
+            let value: f64 = parts[col_idx].parse().map_err(|_| Error::ParseError {
+                line: line_num + 1,
+                content: parts[col_idx].clone(),
+            })?;
+
+            values.push(value);
+        }
+
+        let n = labels.len();
+        if n * n != values.len() {
+            return Err(Error::ParseError {
+                line: 0,
+                content: format!(
+                    "Expected {}² = {} values, but found {}",
+                    n, n * n, values.len()
+                ),
+            });
+        }
+
+        let mut data = Vec::with_capacity(n);
+        for i in 0..n {
+            let start = i * n;
+            let end = start + n;
+            data.push(values[start..end].to_vec());
+        }
+
+        DataMatrix::new(data, labels.clone(), labels)
     }
 }
 

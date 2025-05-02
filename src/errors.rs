@@ -19,6 +19,10 @@ pub enum Error {
     #[error("Invalid value at line {line}: '{content}'")]
     ParseError { line: usize, content: String},
 
+    /// Incorrect number of data values; expected a square matrix packed row-wise.
+    #[error("Incorrect number of data values: {n_data}; expected a square matrix packed row-wise.")]
+    WrongNumberOfData { n_data: usize},
+
     /// Generic I/O error.
     #[error("I/O error: {0}")]
     IoError(#[from] std::io::Error),
