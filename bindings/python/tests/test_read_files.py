@@ -66,6 +66,8 @@ def random_data():
     data = [0, 1, 2, 3, 4, 5, 6, 7, 8]
     dmatrix = DataMatrixBuilder().from_data(data)
     assert dmatrix.nrows() == 3
+    data_obj = dmatrix.data()
+    assert data_obj == [[0,1,2], [3, 4, 5], [6, 7, 8]]
     
     
 if __name__ == "__main__":

@@ -43,5 +43,9 @@ impl PyDataMatrix {
     pub fn get_by_label(&self, row_label: &str, col_label: &str) -> Option<f64> {
         self.inner.get_by_label(row_label, col_label)
     }
+
+    pub fn data(&self) -> Vec<Vec<f64>> {
+        self.inner.data().clone()
+    }
 }
 
