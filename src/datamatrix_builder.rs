@@ -92,6 +92,10 @@ pub struct DataMatrixBuilder {
 }
 
 impl DataMatrixBuilder {
+
+    /// Creates just a new builder.
+    ///
+    /// Now use its methods to set up column indexes (e.g. [`label_columns()`](DataMatrixBuilder::label_columns)), then provide some data (e.g. [`from_file()`](DataMatrixBuilder::from_file))
     pub fn new() -> Self {
         Self {
             row_label_col: 0,
@@ -127,8 +131,12 @@ impl DataMatrixBuilder {
     }
 
     /// Provides labels for the case when the input data is a single column.
-    pub fn labels(mut self, labels: Vec<String>) -> Self {
-        self.labels = Some(labels);
+    pub fn labels<I, S>(mut self, labels: I) -> Self
+    where
+        I: IntoIterator<Item = S>,
+        S: Into<String>
+    {
+        self.labels = Some(labels.into_iter().map(Into::into).collect());
         self
     }
 
@@ -183,7 +191,16 @@ impl DataMatrixBuilder {
         self
     }
 
-    /// Creates a new `DataMatrix` from a given vector of data.
+    /// Creates a new [`DataMatrix`] from a given 1D vector of data.
+    ///
+    /// This method is devised to turn a 1D column of numbers into a **square** (usually symmetrix)
+    /// 2D [`DataMatrix`] object.
+    /// Labels should be provided with [`labels()`](DataMatrixBuilder::labels) method,
+    /// otherwise they will be automatically generated as `"row-{}", i + 1` and `col-{}", i + 1`
+    /// for rows and columns, respectively.
+    ///
+    /// # Examples
+    /// Creates a square matrix with automatically generated labels:
     ///
     /// ```rust
     /// use datamatrix::{DataMatrixBuilder, Error};
@@ -192,9 +209,26 @@ impl DataMatrixBuilder {
     /// let matrix = DataMatrixBuilder::new().from_data(&data).unwrap();
     /// assert_eq!(matrix.ncols(), 3);
     /// assert_eq!(matrix.get(0,0).unwrap(), 1.0);
+    /// assert_eq!(matrix.row_label(0), "row-1");
     /// # Ok(())
     /// # }
     /// ```
+    ///
+    /// Creates a square symmetric matrix with user-defined labels:
+    ///
+    /// ```rust
+    /// use datamatrix::{DataMatrixBuilder, Error};
+    /// # fn main() -> Result<(), Error> {
+    /// let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
+    /// let labels = ["data-1", "data-2", "data-3"];
+    /// let matrix = DataMatrixBuilder::new().labels(labels).from_data(&data).unwrap();
+    /// assert_eq!(matrix.ncols(), 3);
+    /// assert_eq!(matrix.get(0,0).unwrap(), 1.0);
+    /// assert_eq!(matrix.row_label(0), "data-1");
+    /// # Ok(())
+    /// # }
+    /// ```
+    ///
     pub fn from_data(self, data: &[f64]) -> Result<DataMatrix, Error> {
         let len = data.len();
         let n = (len as f64).sqrt() as usize;

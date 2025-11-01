@@ -24,7 +24,7 @@
 //!
 //! ## Reading Matrices
 //!
-//! Use [`DatamatrixBuilder`] to create a DataMatrix from a given file of data. This builder can read:
+//! Use [`DataMatrixBuilder`] to create a [`DataMatrix`] from a given file of data. This builder can read:
 //! - a file with three columns (row label, column label, value).
 //! - a flat list of values in a single column, forming a square matrix.
 //! - a matrix from a file providing explicit indices along with labels;
@@ -123,7 +123,8 @@ pub struct DataMatrix {
 impl DataMatrix {
     /// Creates a new DataMatrix from data and labels.
     ///
-    /// Results in an error if the data shape does not match the labels.
+    /// Results in an error if the data shape does not match the labels. In daily work you might prefer
+    /// to use [`DataMatrixBuilder`] to create a [`DataMatrix`] from a file or data.
     pub fn new(data: Vec<Vec<f64>>, row_labels: Vec<String>, col_labels: Vec<String>) -> Result<Self, Error> {
         if data.len() != row_labels.len() {
             return  Err(IncorrectMatrixLabels{ expected: row_labels.len(), actual: data.len()})
@@ -198,4 +199,3 @@ impl DataMatrix {
         self.nrows() == self.ncols()
     }
 }
-
