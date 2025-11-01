@@ -1,6 +1,6 @@
-//! # datamatrix
+//! # Two dimensional array indexed by string labels
 //!
-//! `datamatrix` provides a simple and efficient implementation of a two-dimensional matrix
+//! [`datamatrix`] provides a simple and efficient implementation of a two-dimensional matrix
 //! of numeric values (`f64`), with support for labeled rows and columns.
 //!
 //! It is particularly useful for handling datasets where elements are naturally accessed

@@ -7,7 +7,7 @@ use crate::{DataMatrix, Error};
 
 /// A builder for loading labeled matrices from plain text, CSV, or TSV files.
 ///
-/// `DataMatrixBuilder` provides flexible configuration for how files are parsed:
+/// [`DataMatrixBuilder`] provides flexible configuration for how files are parsed:
 /// - specify which columns contain row labels, column labels, and values,
 /// - optionally specify explicit row and column indices (for 5-column formats),
 /// - control the separator (space, comma, tab, etc.),
@@ -65,6 +65,7 @@ use crate::{DataMatrix, Error};
 ///     .data_column(3)         // column 3: value
 ///     .separator(' ')         // whitespace separator
 ///     .symmetric(true)        // make symmetric
+///     .skip_header(false)     // this is the default behaviour
 ///     .from_file(input_fname)?;
 /// # assert_eq!(matrix.ncols(), 3);
 /// # assert_eq!(matrix.nrows(), 3);
@@ -74,7 +75,8 @@ use crate::{DataMatrix, Error};
 ///
 /// # Notes
 /// - Columns are indexed starting **from 1**
-/// - `.separator(' ')`, `.separator(',')`, and `.separator('\\t')` are supported.
+/// - field separator must be a single character (with an exception for `' '`, see below); if not given, the value will be inferred from the file extension,
+///     e.g. `'\t'` for `.tsv`
 /// - when `' '` (a space) is used a separator, the builder splits by all white spaces, i.e.  `str.split_whitespace(&self)`
 ///   method is used
 /// - `.symmetric(true)` ensures that if (i,j) is set, (j,i) will also be set automatically.
@@ -85,7 +87,7 @@ pub struct DataMatrixBuilder {
     data_col: usize,
     row_idx_col: Option<usize>,
     col_idx_col: Option<usize>,
-    separator: char,
+    separator: Option<char>,
     symmetric: bool,
     skip_header: bool,
     labels: Option<Vec<String>>,
@@ -103,7 +105,7 @@ impl DataMatrixBuilder {
             data_col: 2,
             row_idx_col: None,
             col_idx_col: None,
-            separator: ' ',
+            separator: None,
             symmetric: false,
             skip_header: false,
             labels: None,
@@ -172,7 +174,7 @@ impl DataMatrixBuilder {
     ///
     /// Common choices: `' '`, `','`, `'\t'`.
     pub fn separator(mut self, sep: char) -> Self {
-        self.separator = sep;
+        self.separator = Some(sep);
         self
     }
 
@@ -265,7 +267,12 @@ impl DataMatrixBuilder {
         let mut row_indexer = Indexer::new();
         let mut col_indexer = Indexer::new();
 
-        let lines = parse_plain(filename, self.separator, self.skip_header)?;
+        let separator = match self.separator {
+            None => guess_separator(&filename),
+            Some(c) => c
+        };
+
+        let lines = parse_plain(filename, separator, self.skip_header)?;
         // ---------- Build the label_to_index map if we have explicit entry indexing
         if let (Some(r_idx), Some(c_idx)) = (self.row_idx_col, self.col_idx_col) {
             let mut line_no = 0;
@@ -312,7 +319,7 @@ impl DataMatrixBuilder {
 
     fn read_one_column<P: AsRef<Path>>(&self, filename: P, column: usize, labels: Vec<String>) -> Result<DataMatrix, Error> {
 
-        let rows = parse_plain(filename, self.separator, self.skip_header)?;
+        let rows = parse_plain(filename, ' ', self.skip_header)?;
         let col_idx = column;
 
         let mut values = Vec::new();
@@ -411,5 +418,61 @@ impl Indexer {
             result[idx] = label.clone();
         }
         result
+    }
+}
+
+/// Guess a field separator from the filename extension.
+///
+/// Supported (case-insensitive):
+/// - `csv` → `,`
+/// - `tsv`, `tab` → `\t`
+/// - `psv` (pipe-separated) → `|`
+/// - `ssv` (semicolon-separated) → `;`
+///
+/// Also handles compressed files like `data.csv.gz` (peels one layer).
+///
+/// Returns `None` if the separator cannot be determined.
+///
+/// # Examples
+/// ```
+/// use std::path::Path;
+///
+/// assert_eq!(guess_separator("data.csv"), ',');
+/// assert_eq!(guess_separator("data.TSV"), '\t');
+/// assert_eq!(guess_separator("table.tab"), '\t');
+/// assert_eq!(guess_separator("log.psv"), '|');
+/// assert_eq!(guess_separator("semi.ssv"), ';');
+/// assert_eq!(guess_separator("archive.csv.gz"), ','); // compressed
+/// ```
+fn guess_separator<P: AsRef<Path>>(path: P) -> char {
+    let path = path.as_ref();
+
+    // Get the likely data extension, handling a single compression suffix.
+    let ext = match path.extension().and_then(|e| e.to_str()) {
+        Some(ext) => {
+            let ext = ext.to_ascii_lowercase();
+            match ext.as_str() {
+                // Peel one compression layer and check the previous extension
+                "gz" | "bz2" | "xz" | "zst" | "zip" => {
+                    // file_stem() of "...csv.gz" is "....csv"
+                    path.file_stem()
+                        .and_then(|s| Path::new(s).extension())
+                        .and_then(|e| e.to_str())
+                        .map(|e| e.to_ascii_lowercase())
+                        .unwrap_or_default()
+                }
+                other => other.to_string(),
+            }
+        }
+        None => String::new(),
+    };
+
+    match ext.as_str() {
+        "dat" => ' ',
+        "csv" => ',',
+        "tsv" | "tab" => '\t',
+        "psv" => '|',
+        "ssv" => ';',
+        _ => ' ',
     }
 }
