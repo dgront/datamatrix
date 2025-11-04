@@ -367,8 +367,6 @@ impl DataMatrixBuilder {
 
 
 fn parse_plain<P: AsRef<Path>>(filename: P, separator: char, skip_header: bool) -> std::io::Result<Vec<Vec<String>>> {
-    // let file = File::open(&filename)?;
-    // let reader = io::BufReader::new(file);
 
     // --- read the file, possibly gzipped
     let reader = open_file(filename)?;
@@ -437,7 +435,7 @@ impl Indexer {
 ///
 /// Also handles compressed files like `data.csv.gz` (peels one layer).
 ///
-/// Returns `None` if the separator cannot be determined.
+/// By default returns ` ` (a space character) if the separator cannot be determined.
 ///
 /// # Examples
 /// ```
