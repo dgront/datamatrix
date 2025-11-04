@@ -53,8 +53,8 @@
 //! # fn main() -> Result<(), Error> {
 //! # let path = "./tests/test_files/three_columns_short.txt";
 //! let matrix = DataMatrixBuilder::new()
-//!     .label_columns(1, 2)
-//!     .data_column(3)
+//!     .label_columns(0, 1)
+//!     .data_column(2)
 //!     .symmetric(true)
 //!     .from_file(path)?;
 //!
@@ -100,12 +100,12 @@
 //!
 //! This project is licensed under the Apache 2.0 license.
 
-mod errors;
 mod datamatrix_builder;
+mod errors;
 
-pub use datamatrix_builder::DataMatrixBuilder;
 pub use crate::errors::Error;
 use crate::Error::IncorrectMatrixLabels;
+pub use datamatrix_builder::DataMatrixBuilder;
 
 /// A dense matrix of numeric values with labeled rows and columns.
 #[derive(Debug, Clone)]
@@ -125,17 +125,30 @@ impl DataMatrix {
     ///
     /// Results in an error if the data shape does not match the labels. In daily work you might prefer
     /// to use [`DataMatrixBuilder`] to create a [`DataMatrix`] from a file or data.
-    pub fn new(data: Vec<Vec<f64>>, row_labels: Vec<String>, col_labels: Vec<String>) -> Result<Self, Error> {
+    pub fn new(
+        data: Vec<Vec<f64>>,
+        row_labels: Vec<String>,
+        col_labels: Vec<String>,
+    ) -> Result<Self, Error> {
         if data.len() != row_labels.len() {
-            return  Err(IncorrectMatrixLabels{ expected: row_labels.len(), actual: data.len()})
+            return Err(IncorrectMatrixLabels {
+                expected: row_labels.len(),
+                actual: data.len(),
+            });
         }
         if data.is_empty() || data[0].len() != col_labels.len() {
-            return  Err(IncorrectMatrixLabels{ expected: col_labels.len(), actual: data[0].len()})
+            return Err(IncorrectMatrixLabels {
+                expected: col_labels.len(),
+                actual: data[0].len(),
+            });
         }
 
-        Ok(Self { data, row_labels, col_labels })
+        Ok(Self {
+            data,
+            row_labels,
+            col_labels,
+        })
     }
-
 
     /// Returns the number of rows.
     pub fn nrows(&self) -> usize {
@@ -164,16 +177,24 @@ impl DataMatrix {
     }
 
     /// Returns the label of a row by its index.
-    pub fn row_index(&self, label: &str) -> Option<usize> { self.row_labels.iter().position(|r| r == label) }
+    pub fn row_index(&self, label: &str) -> Option<usize> {
+        self.row_labels.iter().position(|r| r == label)
+    }
 
     /// Returns the label of a column by its index.
-    pub fn col_index(&self, label: &str) -> Option<usize> { self.col_labels.iter().position(|r| r == label) }
+    pub fn col_index(&self, label: &str) -> Option<usize> {
+        self.col_labels.iter().position(|r| r == label)
+    }
 
     /// Returns the label of a row by its index.
-    pub fn row_label(&self, index: usize) -> &String { &self.row_labels[index] }
+    pub fn row_label(&self, index: usize) -> &String {
+        &self.row_labels[index]
+    }
 
     /// Returns the label of a column by its index.
-    pub fn col_label(&self, index: usize) -> &String { &self.col_labels[index] }
+    pub fn col_label(&self, index: usize) -> &String {
+        &self.col_labels[index]
+    }
 
     /// Returns the row labels.
     ///

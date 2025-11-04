@@ -1,9 +1,9 @@
-use std::collections::HashMap;
-use std::io::{self, BufRead, ErrorKind, BufReader};
-use std::fs::File;
-use std::path::{Path};
-use std::ffi::OsStr;
 use flate2::read;
+use std::collections::HashMap;
+use std::ffi::OsStr;
+use std::fs::File;
+use std::io::{self, BufRead, BufReader, ErrorKind};
+use std::path::Path;
 
 use crate::{DataMatrix, Error};
 
@@ -64,7 +64,7 @@ use crate::{DataMatrix, Error};
 ///
 /// let matrix = DataMatrixBuilder::new()
 ///     .label_columns(0, 1)    // columns 0 and 1: row and column labels
-///     .data_column(2))         // column 2: value
+///     .data_column(2)         // column 2: value
 ///     .separator(' ')         // whitespace separator
 ///     .symmetric(true)        // make symmetric
 ///     .skip_header(false)     // this is the default behaviour
@@ -95,8 +95,8 @@ pub struct DataMatrixBuilder {
     labels: Option<Vec<String>>,
 }
 
+#[allow(clippy::new_without_default)]
 impl DataMatrixBuilder {
-
     /// Creates just a new builder.
     ///
     /// Now use its methods to set up column indexes (e.g. [`label_columns()`](DataMatrixBuilder::label_columns)), then provide some data (e.g. [`from_file()`](DataMatrixBuilder::from_file))
@@ -138,7 +138,7 @@ impl DataMatrixBuilder {
     pub fn labels<I, S>(mut self, labels: I) -> Self
     where
         I: IntoIterator<Item = S>,
-        S: Into<String>
+        S: Into<String>,
     {
         self.labels = Some(labels.into_iter().map(Into::into).collect());
         self
@@ -260,8 +260,7 @@ impl DataMatrixBuilder {
     }
 
     /// Loads the matrix from the given file path according to the current builder settings.
-    pub fn from_file<P: AsRef<Path>>(self, filename: P)-> Result<DataMatrix, Error> {
-
+    pub fn from_file<P: AsRef<Path>>(self, filename: P) -> Result<DataMatrix, Error> {
         if let Some(ref labels) = self.labels {
             return self.read_one_column(filename, self.data_col, labels.clone());
         }
@@ -271,29 +270,37 @@ impl DataMatrixBuilder {
 
         let separator = match self.separator {
             None => guess_separator(&filename),
-            Some(c) => c
+            Some(c) => c,
         };
 
         let lines = parse_plain(filename, separator, self.skip_header)?;
         // ---------- Build the label_to_index map if we have explicit entry indexing
         if let (Some(r_idx), Some(c_idx)) = (self.row_idx_col, self.col_idx_col) {
-            let mut line_no = 0;
-            for parts in &lines {
-                let row_idx: usize = parts[r_idx].parse().map_err(|_| Error::ParseError { line: line_no, content: format!("{}", parts[r_idx]) })?;
-                let col_idx: usize = parts[c_idx].parse().map_err(|_| Error::ParseError { line: line_no, content: format!("{}", parts[c_idx]) })?;
+            for (line_no, parts) in lines.iter().enumerate() {
+                let row_idx: usize = parts[r_idx].parse().map_err(|_| Error::ParseError {
+                    line: line_no,
+                    content: parts[r_idx].to_string(),
+                })?;
+                let col_idx: usize = parts[c_idx].parse().map_err(|_| Error::ParseError {
+                    line: line_no,
+                    content: parts[c_idx].to_string(),
+                })?;
                 row_indexer.add_explicit(&parts[self.row_label_col], row_idx);
                 if self.symmetric {
                     row_indexer.add_explicit(&parts[self.col_label_col], col_idx);
                 } else {
                     col_indexer.add_explicit(&parts[self.col_label_col], col_idx);
                 }
-                line_no += 1;
             }
-        } else {    // ---------- Build the label_to_index map if we don't have explicit entry indexing
+        } else {
+            // ---------- Build the label_to_index map if we don't have explicit entry indexing
             for parts in &lines {
                 row_indexer.add(&parts[self.row_label_col]);
-                if self.symmetric { row_indexer.add(&parts[self.col_label_col]); }
-                else { col_indexer.add(&parts[self.col_label_col]); }
+                if self.symmetric {
+                    row_indexer.add(&parts[self.col_label_col]);
+                } else {
+                    col_indexer.add(&parts[self.col_label_col]);
+                }
             }
         }
 
@@ -304,23 +311,30 @@ impl DataMatrixBuilder {
         let row_labels = row_indexer.to_vec();
         let col_labels = col_indexer.to_vec();
 
-        let mut line_no = 0;
-        for parts in lines {
+        for (line_no, parts) in lines.into_iter().enumerate() {
             let i_row = row_indexer.index(&parts[self.row_label_col]);
             let j_col = col_indexer.index(&parts[self.col_label_col]);
-            let value: f64 = parts[self.data_col].parse().map_err(|_| Error::ParseError { line: line_no, content: format!("{}", &parts[self.data_col]) })?;
+            let value: f64 = parts[self.data_col]
+                .parse()
+                .map_err(|_| Error::ParseError {
+                    line: line_no,
+                    content: parts[self.data_col].to_string()
+                })?;
             data[i_row][j_col] = value;
             if self.symmetric {
                 data[j_col][i_row] = value;
             }
-            line_no += 1;
         }
 
         DataMatrix::new(data, row_labels, col_labels)
     }
 
-    fn read_one_column<P: AsRef<Path>>(&self, filename: P, column: usize, labels: Vec<String>) -> Result<DataMatrix, Error> {
-
+    fn read_one_column<P: AsRef<Path>>(
+        &self,
+        filename: P,
+        column: usize,
+        labels: Vec<String>,
+    ) -> Result<DataMatrix, Error> {
         let rows = parse_plain(filename, ' ', self.skip_header)?;
         let col_idx = column;
 
@@ -349,7 +363,9 @@ impl DataMatrixBuilder {
                 line: 0,
                 content: format!(
                     "Expected {}² = {} values, but found {}",
-                    n, n * n, values.len()
+                    n,
+                    n * n,
+                    values.len()
                 ),
             });
         }
@@ -365,9 +381,11 @@ impl DataMatrixBuilder {
     }
 }
 
-
-fn parse_plain<P: AsRef<Path>>(filename: P, separator: char, skip_header: bool) -> std::io::Result<Vec<Vec<String>>> {
-
+fn parse_plain<P: AsRef<Path>>(
+    filename: P,
+    separator: char,
+    skip_header: bool,
+) -> std::io::Result<Vec<Vec<String>>> {
     // --- read the file, possibly gzipped
     let reader = open_file(filename)?;
 
@@ -379,7 +397,10 @@ fn parse_plain<P: AsRef<Path>>(filename: P, separator: char, skip_header: bool) 
             continue;
         }
         // skip the first line if this is a header
-        if !first_passed && skip_header { first_passed=true; continue }
+        if !first_passed && skip_header {
+            first_passed = true;
+            continue;
+        }
         let parts: Vec<String> = if separator == ' ' {
             line.split_whitespace().map(|s| s.to_string()).collect()
         } else {
@@ -391,10 +412,16 @@ fn parse_plain<P: AsRef<Path>>(filename: P, separator: char, skip_header: bool) 
 }
 
 #[derive(Clone)]
-struct Indexer { label_to_index: HashMap<String, usize>, }
+struct Indexer {
+    label_to_index: HashMap<String, usize>,
+}
 
 impl Indexer {
-    fn new() -> Self { Self { label_to_index: HashMap::new(), } }
+    fn new() -> Self {
+        Self {
+            label_to_index: HashMap::new(),
+        }
+    }
 
     fn add(&mut self, label: &str) -> usize {
         if let Some(&idx) = self.label_to_index.get(label) {
@@ -411,10 +438,15 @@ impl Indexer {
     }
 
     fn index(&self, label: &str) -> usize {
-        *self.label_to_index.get(label).expect("Label not found in indexer")
+        *self
+            .label_to_index
+            .get(label)
+            .expect("Label not found in indexer")
     }
 
-    fn max_index(&self) -> usize { self.label_to_index.len() }
+    fn max_index(&self) -> usize {
+        self.label_to_index.len()
+    }
 
     fn to_vec(&self) -> Vec<String> {
         let mut result = vec!["".to_string(); self.label_to_index.len()];
@@ -438,7 +470,7 @@ impl Indexer {
 /// By default returns ` ` (a space character) if the separator cannot be determined.
 ///
 /// # Examples
-/// ```
+/// ```rust,ignore
 /// use std::path::Path;
 ///
 /// assert_eq!(guess_separator("data.csv"), ',');
@@ -494,7 +526,7 @@ fn open_file<P: AsRef<Path>>(file_path: P) -> io::Result<Box<dyn BufRead>> {
             "Couldn't open file: empty path",
         ));
     }
-    let file = File::open(&path)?;
+    let file = File::open(path)?;
 
     if file_path.as_ref().extension() == Some(OsStr::new("gz")) {
         Ok(Box::new(BufReader::with_capacity(
