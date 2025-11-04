@@ -35,6 +35,7 @@ labels to rows and columns, and performing label-based lookup or symmetric compl
       .from_file("test_files/cities_by_distance.csv.gz")?;
   ```
 
+
 ## Installation
 ```toml
 [dependencies]
@@ -62,6 +63,21 @@ println!("{:?}", m.get_by_label("G1", "S2"))
 
 single column, three-column and five-column input files are supported. Alternatively, a `DataMatrix` struct can be created from raw data.
 
-## License
 
+## Python library
+The project provides also Python bindings to the datamatrix crate, which allows to use it in Python scripts as below:
+```Python
+from datamatrix import DataMatrixBuilder
+
+dmatrix = (DataMatrixBuilder()
+    .label_columns(0, 1)
+    .data_column(4)
+    .index_columns(2, 3)
+    .symmetric(True)
+    .from_file("../../../tests/test_files/five_columns_short.txt"))
+assert dmatrix.ncols() == 3
+assert dmatrix.get_by_label("Bob", "Alice") == 1.5
+```
+
+## License
 Licensed under Apache License, Version 2.0 (LICENSE-APACHE https://www.apache.org/licenses/LICENSE-2.0)

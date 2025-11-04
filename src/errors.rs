@@ -2,6 +2,7 @@ use thiserror::Error;
 
 /// Custom error type for DataMatrix operations.
 #[derive(Debug, Error)]
+#[non_exhaustive]
 pub enum Error {
     /// Row or column labels count does not match number of rows / columns
     #[error("The number of labels {expected} does not match the count anticipated from the data matrix {actual}")]
