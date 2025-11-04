@@ -1,8 +1,10 @@
 use std::collections::HashMap;
+use std::io::{self, BufRead, ErrorKind, BufReader};
 use std::fs::File;
-use std::io;
-use std::io::BufRead;
-use std::path::Path;
+use std::path::{Path};
+use std::ffi::OsStr;
+use flate2::read;
+
 use crate::{DataMatrix, Error};
 
 /// A builder for loading labeled matrices from plain text, CSV, or TSV files.
@@ -36,9 +38,9 @@ use crate::{DataMatrix, Error};
 /// # fn main() -> Result<(), Error> {
 /// # let input_fname = "./tests/test_files/five_columns_short.txt";
 /// let matrix = DataMatrixBuilder::new()
-///     .label_columns(1, 2)    // columns 1 and 2: row and column labels
-///     .index_columns(3, 4)    // columns 3 and 4: row and column indices
-///     .data_column(5)         // column 5: value
+///     .label_columns(0, 1)    // columns 0 and 1: row and column labels
+///     .index_columns(2, 3)    // columns 2 and 3: row and column indices
+///     .data_column(4)         // column 4: value
 ///     .separator(' ')         // whitespace separator
 ///     .symmetric(true)        // make symmetric
 ///     .from_file(input_fname)?;
@@ -61,8 +63,8 @@ use crate::{DataMatrix, Error};
 /// # let input_fname = "./tests/test_files/three_columns_short.txt";
 ///
 /// let matrix = DataMatrixBuilder::new()
-///     .label_columns(1, 2)    // columns 1 and 2: row and column labels
-///     .data_column(3)         // column 3: value
+///     .label_columns(0, 1)    // columns 0 and 1: row and column labels
+///     .data_column(2))         // column 2: value
 ///     .separator(' ')         // whitespace separator
 ///     .symmetric(true)        // make symmetric
 ///     .skip_header(false)     // this is the default behaviour
@@ -114,7 +116,7 @@ impl DataMatrixBuilder {
 
     /// Specifies which columns contain the row and column labels.
     ///
-    /// Column indices are **1-based** (i.e., the first column is 1).
+    /// Column indices are **0-based** (i.e., the first column is 0).
     ///
     /// # Arguments
     /// * `row` — Column number for row labels.
@@ -127,8 +129,8 @@ impl DataMatrixBuilder {
     /// builder.label_columns(1, 2);
     /// ```
     pub fn label_columns(mut self, row: usize, col: usize) -> Self {
-        self.row_label_col = row - 1;
-        self.col_label_col = col - 1;
+        self.row_label_col = row;
+        self.col_label_col = col;
         self
     }
 
@@ -144,15 +146,15 @@ impl DataMatrixBuilder {
 
     /// Specifies which column contains the numeric value.
     ///
-    /// Column index is **1-based**.
+    /// Column index is **0-based**.
     pub fn data_column(mut self, val: usize) -> Self {
-        self.data_col = val - 1;
+        self.data_col = val;
         self
     }
 
     /// Specifies which columns provide explicit row and column indices.
     ///
-    /// Column indices are **1-based**.
+    /// Column indices are **0-based**.
     ///
     /// # Arguments
     /// * `row_idx` — Column number for the row index.
@@ -165,8 +167,8 @@ impl DataMatrixBuilder {
     /// builder.index_columns(3, 4);
     /// ```
     pub fn index_columns(mut self, row_idx: usize, col_idx: usize) -> Self {
-        self.row_idx_col = Some(row_idx - 1);
-        self.col_idx_col = Some(col_idx - 1);
+        self.row_idx_col = Some(row_idx);
+        self.col_idx_col = Some(col_idx);
         self
     }
 
@@ -364,9 +366,13 @@ impl DataMatrixBuilder {
 }
 
 
-fn parse_plain<P: AsRef<Path>>(filename: P, separator: char, skip_header: bool) -> Result<Vec<Vec<String>>, Error> {
-    let file = File::open(&filename)?;
-    let reader = io::BufReader::new(file);
+fn parse_plain<P: AsRef<Path>>(filename: P, separator: char, skip_header: bool) -> std::io::Result<Vec<Vec<String>>> {
+    // let file = File::open(&filename)?;
+    // let reader = io::BufReader::new(file);
+
+    // --- read the file, possibly gzipped
+    let reader = open_file(filename)?;
+
     let mut first_passed = false;
     let mut lines = Vec::new();
     for line in reader.lines() {
@@ -474,5 +480,30 @@ fn guess_separator<P: AsRef<Path>>(path: P) -> char {
         "psv" => '|',
         "ssv" => ';',
         _ => ' ',
+    }
+}
+
+/// This function can open a regular file or a gzipped one, as determined by the extension
+/// of the input file name. A boxed reader to the content is returned.
+///
+/// The code has been copied from bioshell-io::utils
+fn open_file<P: AsRef<Path>>(file_path: P) -> io::Result<Box<dyn BufRead>> {
+    let path = file_path.as_ref();
+
+    if path.as_os_str().is_empty() {
+        return Err(io::Error::new(
+            ErrorKind::InvalidInput,
+            "Couldn't open file: empty path",
+        ));
+    }
+    let file = File::open(&path)?;
+
+    if file_path.as_ref().extension() == Some(OsStr::new("gz")) {
+        Ok(Box::new(BufReader::with_capacity(
+            128 * 1024,
+            read::GzDecoder::new(file),
+        )))
+    } else {
+        Ok(Box::new(BufReader::with_capacity(128 * 1024, file)))
     }
 }

@@ -28,3 +28,9 @@ labels to rows and columns, and performing label-based lookup or symmetric compl
   let val_ab = dm.get_by_label("Alice", "Bob");
   let val_ij = dm.get(0, 1);
   ```
+
+  - Reads compressed input:
+  ```rust
+  let dm = DataMatrixBuilder::new()
+      .from_file("test_files/cities_by_distance.csv.gz")?;
+  ```
