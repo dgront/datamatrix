@@ -1,14 +1,16 @@
 [package]
 name = "datamatrix"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2021"
 authors = ["dgront@chem.uw.edu.pl"]
-description = "Flexible matrix for 2D data with annotated rows and columns"
+description = "Labeled numeric matrices with file ingest (CSV/TSV/etc.), symmetric fill, and fast label-based lookup."
 license = "Apache-2.0"
 repository = "https://github.com/dgront/datamatrix"
-keywords = ["matrix", "data", "loader", "scientific", "heatmap"]
-categories = ["science", "data-structures"]
+keywords = ["matrix", "loader", "csv", "tsv", "labels"]
+categories = ["science", "data-structures", "parsing"]
+homepage = "https://github.com/dgront/datamatrix"
+documentation = "https://docs.rs/datamatrix"
+readme = "README.md"
 
 [dependencies]
-clap = { version = "4.4", features = ["derive"] }
 thiserror = "1.0"
