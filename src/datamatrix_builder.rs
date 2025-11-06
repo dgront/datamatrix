@@ -34,7 +34,7 @@ use crate::{DataMatrix, Error};
 /// ```
 ///
 /// ```rust
-/// use datamatrix::{DataMatrixBuilder, Error};
+/// use data_matrix::{DataMatrixBuilder, Error};
 /// # fn main() -> Result<(), Error> {
 /// # let input_fname = "./tests/test_files/five_columns_short.txt";
 /// let matrix = DataMatrixBuilder::new()
@@ -58,7 +58,7 @@ use crate::{DataMatrix, Error};
 /// ```
 ///
 /// ```rust
-/// use datamatrix::{DataMatrixBuilder, Error};
+/// use data_matrix::{DataMatrixBuilder, Error};
 /// # fn main() -> Result<(), Error> {
 /// # let input_fname = "./tests/test_files/three_columns_short.txt";
 ///
@@ -124,7 +124,7 @@ impl DataMatrixBuilder {
     ///
     /// # Example
     /// ```rust
-    /// use datamatrix::DataMatrixBuilder;
+    /// use data_matrix::DataMatrixBuilder;
     /// let mut builder = DataMatrixBuilder::new();
     /// builder.label_columns(1, 2);
     /// ```
@@ -162,7 +162,7 @@ impl DataMatrixBuilder {
     ///
     /// # Example
     /// ```rust
-    /// use datamatrix::DataMatrixBuilder;
+    /// use data_matrix::DataMatrixBuilder;
     /// let mut builder = DataMatrixBuilder::new();
     /// builder.index_columns(3, 4);
     /// ```
@@ -207,7 +207,7 @@ impl DataMatrixBuilder {
     /// Creates a square matrix with automatically generated labels:
     ///
     /// ```rust
-    /// use datamatrix::{DataMatrixBuilder, Error};
+    /// use data_matrix::{DataMatrixBuilder, Error};
     /// # fn main() -> Result<(), Error> {
     /// let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
     /// let matrix = DataMatrixBuilder::new().from_data(&data).unwrap();
@@ -221,7 +221,7 @@ impl DataMatrixBuilder {
     /// Creates a square symmetric matrix with user-defined labels:
     ///
     /// ```rust
-    /// use datamatrix::{DataMatrixBuilder, Error};
+    /// use data_matrix::{DataMatrixBuilder, Error};
     /// # fn main() -> Result<(), Error> {
     /// let data = vec![1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0];
     /// let labels = ["data-1", "data-2", "data-3"];

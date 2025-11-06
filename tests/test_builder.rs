@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test_builder {
-    use datamatrix::{DataMatrixBuilder, Error};
+    use data_matrix::{DataMatrixBuilder, Error};
 
     #[test]
     fn from_three_columns() -> Result<(), Error> {

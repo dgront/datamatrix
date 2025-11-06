@@ -19,7 +19,7 @@ the crate offers utilities to read matrices directly from structured text files.
 
 
 ## Example
-The following [`example_input.tsv`](https://raw.githubusercontent.com/<user>/<repo>/<tag-or-branch>/examples/data/input.tsv) input file with 3 columns:
+The following [`example_input.tsv`](https://github.com/dgront/datamatrix/blob/master/tests/test_files/example_input.tsv) input file with 3 columns:
 
 | gene | sample | value |
 | ---- | ------ | ----- |
@@ -30,7 +30,7 @@ The following [`example_input.tsv`](https://raw.githubusercontent.com/<user>/<re
 
 can be loaded with the code given below:
 ```rust
-use datamatrix::{DataMatrixBuilder, Error};
+use data_matrix::{DataMatrixBuilder, Error};
 # fn main() -> Result<(), Error> {
 let dm = DataMatrixBuilder::new()
       .label_columns(0, 1)          // 0-based column indexes for row and column labels
@@ -51,7 +51,7 @@ By default, DataMatrixBuilder expects labels to be in the first two columns and 
 The code above can be therefore shortened to:
 
 ```rust
-use datamatrix::{DataMatrixBuilder, Error};
+use data_matrix::{DataMatrixBuilder, Error};
 # fn main() -> Result<(), Error> {
 let matrix = DataMatrixBuilder::new().skip_header(true).from_file("./tests/test_files/example_input.tsv")?;
 let value = matrix.get_by_label("G1", "S1");

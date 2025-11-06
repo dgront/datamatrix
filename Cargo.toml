@@ -1,5 +1,5 @@
 [package]
-name = "datamatrix"
+name = "data-matrix"
 version = "0.2.0"
 edition = "2021"
 authors = ["dgront@chem.uw.edu.pl"]
@@ -9,7 +9,7 @@ repository = "https://github.com/dgront/datamatrix"
 keywords = ["matrix", "loader", "csv", "tsv", "labels"]
 categories = ["science", "data-structures", "parsing"]
 homepage = "https://github.com/dgront/datamatrix"
-documentation = "https://docs.rs/datamatrix"
+documentation = "https://docs.rs/data-matrix"
 readme = "README.md"
 
 [dependencies]

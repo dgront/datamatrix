@@ -17,7 +17,7 @@ the crate offers utilities to read matrices directly from structured text files.
 - Transparent reading of compressed files (.gz, .bz2, .xz).
 
 
-The following [`example_input.tsv`](https://raw.githubusercontent.com/<user>/<repo>/<tag-or-branch>/examples/data/input.tsv) input file with 3 columns:
+The following [`example_input.tsv`](https://github.com/dgront/datamatrix/blob/master/tests/test_files/example_input.tsv) input file with 3 columns:
 
 | gene | sample | value |
 | ---- | ------ | ----- |
