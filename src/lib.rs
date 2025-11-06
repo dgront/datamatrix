@@ -1,3 +1,6 @@
+#![cfg_attr(docsrs, feature(doc_cfg))]
+#![doc(html_root_url = "https://docs.rs/datamatrix/0.2.0")]
+
 //! # Two dimensional array indexed by string labels
 #![doc = include_str!("../README.rustdoc.md")]
 

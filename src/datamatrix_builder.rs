@@ -76,7 +76,7 @@ use crate::{DataMatrix, Error};
 /// ```
 ///
 /// # Notes
-/// - Columns are indexed starting **from 1**
+/// - Columns are indexed starting **from 0**
 /// - field separator must be a single character (with an exception for `' '`, see below); if not given, the value will be inferred from the file extension,
 ///     e.g. `'\t'` for `.tsv`
 /// - when `' '` (a space) is used a separator, the builder splits by all white spaces, i.e.  `str.split_whitespace(&self)`
