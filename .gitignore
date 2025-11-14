@@ -3,6 +3,7 @@ target/
 .idea/
 pkg/
 venv-maturin/
+.venv-maturin/
 .venv/
 Cargo.lock
 *.pdb

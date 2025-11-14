@@ -1,16 +1,16 @@
 use pyo3::prelude::*;
 
-use datamatrix::DataMatrix;
+use data_matrix::DataMatrix;
 
 #[pyclass(name = "DataMatrix")]
 #[derive(Clone)]
 pub struct PyDataMatrix {
-    inner: datamatrix::DataMatrix,
+    inner: data_matrix::DataMatrix,
 }
 
 impl PyDataMatrix {
-    pub fn from_datamatrix(datamatrix: DataMatrix) -> Self {
-        PyDataMatrix { inner: datamatrix }
+    pub fn from_datamatrix(data_matrix: DataMatrix) -> Self {
+        PyDataMatrix { inner: data_matrix }
     }
 }
 
@@ -48,4 +48,3 @@ impl PyDataMatrix {
         self.inner.data().clone()
     }
 }
-

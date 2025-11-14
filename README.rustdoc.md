@@ -67,7 +67,7 @@ Add the following line to your `Cargo.toml` file an let `cargo` do the rest
 datamatrix = "0.2"
 ```
 
-## Python bindings
+# Python package
 The project provides also Python bindings to the datamatrix crate, which allows to use it in Python scripts as below:
 
 ```Python
@@ -83,6 +83,40 @@ assert dmatrix.ncols() == 3
 assert dmatrix.get_by_label("Bob", "Alice") == 1.5
 ```
 
+## Compilation
+You need **maturin** to compile the datamatrix Python module, which runs in a virtual environment You can use the `requirements.txt` file provided in `./bindings/python` to ease the installation:
+
+### Set up a virtual environment and install build deps
+
+```bash
+cd bindings/python
+
+# Create & activate a virtual environment - only once
+python3 -m venv .venv-maturin
+# Activate the virtual environment - before compilation
+# Linux/macOS:
+source .venv-maturin/bin/activate
+# (Windows PowerShell:)
+# .venv\Scripts\Activate.ps1
+
+# Upgrade pip and install maturin (and any other build deps)
+pip install -U pip
+pip install -r requirements.txt
+```
+
+### Build and install locally for development
+This compiles the Rust extension and installs the Python package into the active venv:
+```bash
+maturin develop --release
+# Test if it works
+python -c "import datamatrix; print(datamatrix.__doc__[:60])"
+```
+
+### Build distribution wheels (for packaging/upload)
+Build wheels into `target/wheels/`:
+```bash
+maturin build --release
+```
 
 ## License
 Licensed under Apache License, Version 2.0 (LICENSE-APACHE https://www.apache.org/licenses/LICENSE-2.0)

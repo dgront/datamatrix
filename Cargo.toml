@@ -12,6 +12,10 @@ homepage = "https://github.com/dgront/datamatrix"
 documentation = "https://docs.rs/data-matrix"
 readme = "README.md"
 
+[package.metadata.docs.rs]
+all-features = false
+rustdoc-args = ["--cfg", "docsrs"]
+
 [dependencies]
 thiserror = "1.0"
 flate2 = "1.0"

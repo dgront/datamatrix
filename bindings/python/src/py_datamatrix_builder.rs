@@ -1,7 +1,7 @@
 use pyo3::prelude::*;
 use pyo3::exceptions::PyValueError;
 
-use datamatrix::DataMatrixBuilder;
+use data_matrix::DataMatrixBuilder;
 use crate::PyDataMatrix;
 
 #[pyclass(name = "DataMatrixBuilder")]

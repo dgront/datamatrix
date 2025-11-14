@@ -9,9 +9,8 @@ crate-type = ["cdylib"]
 
 [dependencies]
 pyo3 = { version = "0.24", features = ["extension-module"] }
-datamatrix = { path = "../../" }
+data_matrix = { package = "data-matrix", path = "../../" }
 
 
 [package.metadata.maturin]
 name = "datamatrix"
-

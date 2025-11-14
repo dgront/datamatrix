@@ -28,7 +28,7 @@ The following [`example_input.tsv`](https://github.com/dgront/datamatrix/blob/ma
 
 can be loaded with the code given below:
 ```rust
-use datamatrix::{DataMatrixBuilder, Error};
+use data_matrix::{DataMatrixBuilder, Error};
 let dm = DataMatrixBuilder::new()
       .label_columns(0, 1)          // 0-based column indexes for row and column labels
       .data_column(2)               // numeric data column
@@ -47,7 +47,7 @@ By default, DataMatrixBuilder expects labels to be in the first two columns and 
 The code above can be therefore shortened to:
 
 ```rust
-use datamatrix::{DataMatrixBuilder, Error};
+use data_matrix::{DataMatrixBuilder, Error};
 let matrix = DataMatrixBuilder::new().skip_header(true).from_file("./tests/test_files/example_input.tsv")?;
 let value = matrix.get_by_label("G1", "S1");
 ```
@@ -75,5 +75,28 @@ assert dmatrix.ncols() == 3
 assert dmatrix.get_by_label("Bob", "Alice") == 1.5
 ```
 
+You need **maturin** to compile the datamatrix Python module, which runs in a virtual environment You can use the `requirements.txt` file provided in `./bindings/python` to ease the installation:
+
+
+```bash
+cd bindings/python
+
+python3 -m venv .venv-maturin
+source .venv-maturin/bin/activate
+
+pip install -U pip
+pip install -r requirements.txt
+```
+
+This compiles the Rust extension and installs the Python package into the active venv:
+```bash
+maturin develop --release
+python -c "import datamatrix; print(datamatrix.__doc__[:60])"
+```
+
+Build wheels into `target/wheels/`:
+```bash
+maturin build --release
+```
 
 Licensed under Apache License, Version 2.0 (LICENSE-APACHE https://www.apache.org/licenses/LICENSE-2.0)
