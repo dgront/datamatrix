@@ -8,7 +8,7 @@ name = "datamatrix"
 crate-type = ["cdylib"]
 
 [dependencies]
-pyo3 = { version = "0.24", features = ["extension-module"] }
+pyo3 = { version = "0.27", features = ["extension-module"] }
 data_matrix = { package = "data-matrix", path = "../../" }
 
 
